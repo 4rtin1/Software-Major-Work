@@ -130,5 +130,3 @@ More info: [Jinja2 Template Docs](https://jinja.palletsprojects.com/) • [Flask
 ## License
 
 MIT License — free to use, modify, and share for educational or personal projects.
-
-VERY COOL

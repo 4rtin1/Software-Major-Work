@@ -9,7 +9,7 @@ from flask_login import (
 )
 
 # Import your database model and forms
-from models import db, User
+from models import db, User, Game
 from forms import RegisterForm, LoginForm, EditAccountForm
 from config import Config
 from seed_db import seed_default_users
@@ -99,6 +99,11 @@ def dashboard():
     """Render the dashboard page for logged-in users."""
     return render_template("dashboard.html")
 
+@app.route("/catalogue")
+@login_required
+def catalogue():
+    games = Game.query.all()
+    return render_template("catalogue.html", games=games)
 
 @app.route("/account", methods=["GET", "POST"])
 @login_required

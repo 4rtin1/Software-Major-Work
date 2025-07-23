@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Game Catalogue{% endblock %}
+{% block content %}
+<h2 class="mb-4">Game Catalogue</h2>
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+  {% for game in games %}
+  <div class="col">
+    <div class="card h-100 shadow-sm">
+      <img src="{{ game.image_url or 'https://placehold.co/300x400' }}" class="card-img-top" alt="{{ game.title }}">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ game.title }}</h5>
+        <p class="card-text flex-grow-1">{{ game.description }}</p>
+        <div class="mb-3">
+          <span class="badge bg-success fs-6">${{ "%.2f"|format(game.price) }}</span>
+        </div>
+        <form action="#" method="post">
+          <button type="submit" class="btn btn-primary w-100">Buy</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

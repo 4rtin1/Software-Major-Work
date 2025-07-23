@@ -1,5 +1,5 @@
 # Import the database instance and User model
-from models import db, User
+from models import db, User, Game
 
 
 def create_user(email, password, is_admin=False):
@@ -34,3 +34,14 @@ def seed_default_users():
     """
     create_user("admin@example.com", "admin123", is_admin=True)
     create_user("user@example.com", "user123", is_admin=False)
+    games = [
+        Game(title="Space Adventure", description="Explore the universe!", price=19.99, genre="Action"),
+        Game(title="Puzzle Quest", description="Solve tricky puzzles.", price=9.99, genre="Puzzle"),
+        Game(title="Battle Arena", description="Fight against players online.", price=14.99, genre="Action"),
+    ]
+    for game in games:
+        exists = Game.query.filter_by(title=game.title).first()
+        if not exists:
+            db.session.add(game)
+    db.session.commit()
+

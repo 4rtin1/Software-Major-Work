@@ -24,8 +24,28 @@ def create_user(email, password, is_admin=False):
     print(f"User '{email}' created.")
     return user
 
+def create_game(title, description, price, genre, size_category):
+    """
+    Create a game if one with the given title doesn't already exist.
+    This prevents duplicate games and is useful for seeding.
+    """
+    # Check if a game with this title already exists in the database
+    existing = Game.query.filter_by(title=title).first()
+    if existing:
+        print(f"Game '{title}' already exists.")
+        return existing
 
-def seed_default_users():
+    # If not, create a new game
+    game = Game(title=title, description=description, price=price, genre=genre, size_category=size_category)
+
+    # Save the new game to the database
+    db.session.add(game)
+    db.session.commit()
+
+    print(f"Game '{title}' created.")
+    return game
+
+def seed_default_data():
     """
     Add default users to the database for testing/demo purposes.
     - One admin user
@@ -34,14 +54,8 @@ def seed_default_users():
     """
     create_user("admin@example.com", "admin123", is_admin=True)
     create_user("user@example.com", "user123", is_admin=False)
-    games = [
-        Game(title="Space Adventure", description="Explore the universe!", price=19.99, genre="Action"),
-        Game(title="Puzzle Quest", description="Solve tricky puzzles.", price=9.99, genre="Puzzle"),
-        Game(title="Battle Arena", description="Fight against players online.", price=14.99, genre="Action"),
-    ]
-    for game in games:
-        exists = Game.query.filter_by(title=game.title).first()
-        if not exists:
-            db.session.add(game)
-    db.session.commit()
-
+    create_game("Space Adventure", "Explore the universe!", 19.99, "Action", "6.78gb", "10+"),
+    create_game("Puzzle Quest", "Solve tricky puzzles.", 9.99, "Puzzle", "0.45gb", "3+"),
+    create_game("Battle Arena", "Fight against players online.", 14.99, "Action", "2.34gb", "12+"),
+    create_game("Fantasy World", "A magical RPG adventure.", 29.99, "RPG", "5.67gb", "10+"),
+    create_game("Cooking Master", "Cook delicious meals!", 4.99, "Simulation", "1.23gb", "10+")

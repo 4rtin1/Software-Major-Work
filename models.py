@@ -42,6 +42,8 @@ class Game(db.Model):
     description = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=False)
     genre = db.Column(db.String(255), nullable=True)
+    size_category = db.Column(db.String(50), nullable=True)
+    age_rating = db.Column(db.String(10), nullable=True)
 
     def __repr__(self):
         return f"<Game {self.title}>"

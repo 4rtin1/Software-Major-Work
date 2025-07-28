@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ game.title }} Details{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="card mx-auto" style="max-width: 700px;">
+    <img src="{{ url_for('static', filename='images/banners/' + game.id|string + '-banner.jpg') }}" class="card-img-top" alt="{{ game.title }} Banner">
+    <div class="card-body">
+      <h2 class="card-title mb-2">{{ game.title }}</h2>
+        <div class="mb-2">
+        <span class="badge bg-warning">Genres: {{ game.genre }}</span>
+        <span class="ms-2 badge bg-danger text-light">Developer: {{ game.developer }}</span>
+        <span class="ms-2 badge bg-secondary">Publisher: {{ game.publisher }}</span>
+        {% if game.size %}<span class="ms-2 badge bg-info text-dark">Size: {{ game.size }}</span>{% endif %}
+        <span class="ms-2 badge bg-success">Price: {{ game.price }}</span>
+      </div>
+      <p class="mt-3">{{ game.description }}</p>
+      {% if game.video_link %}
+      <div class="ratio ratio-16x9 mt-4">
+        <iframe src="{{ game.video_link }}" title="Gameplay video" allowfullscreen></iframe>
+      </div>
+      {% endif %}
+      <a href="{{ url_for('catalogue') }}" class="btn btn-outline-secondary mt-4">Back to Catalogue</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

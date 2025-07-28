@@ -105,6 +105,12 @@ def catalogue():
     games = Game.query.all()
     return render_template("catalogue.html", games=games)
 
+@app.route("/game/<int:game_id>")
+@login_required
+def game_details(game_id):
+    game = Game.query.get_or_404(game_id)
+    return render_template("game_details.html", game=game)
+
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():

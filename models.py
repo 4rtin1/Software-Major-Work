@@ -37,13 +37,15 @@ class User(UserMixin, db.Model):
         return f"<User {self.email}>"
 
 class Game(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    price = db.Column(db.Float, nullable=False)
+    developer = db.Column(db.String(100), nullable=True)
+    publisher = db.Column(db.String(100), nullable=True)
+    price = db.Column(db.String(50), nullable=False)
     genre = db.Column(db.String(255), nullable=True)
-    size_category = db.Column(db.String(50), nullable=True)
-    age_rating = db.Column(db.String(10), nullable=True)
+    size = db.Column(db.String(50), nullable=True)
+    video_link = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         return f"<Game {self.title}>"

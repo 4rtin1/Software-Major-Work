@@ -99,11 +99,99 @@ def dashboard():
     """Render the dashboard page for logged-in users."""
     return render_template("dashboard.html")
 
-@app.route("/catalogue")
+from flask import render_template, request
+from flask_login import login_required
+
+# Assuming your helper functions are defined:
+def parse_price(price_str):
+    if not price_str or "free" in price_str.lower():
+        return 0.0
+    try:
+        return float(price_str.replace("$", "").replace(",", "").strip())
+    except Exception:
+        return 0.0
+
+def parse_size(size_str):
+    if not size_str:
+        return 0.0
+    size_str = size_str.lower().replace("gb", "").strip()
+    try:
+        return float(size_str)
+    except Exception:
+        return 0.0
+
+@app.route("/catalogue", methods=["GET"])
 @login_required
 def catalogue():
     games = Game.query.all()
-    return render_template("catalogue.html", games=games)
+
+    # Build unique genre list
+    unique_genres = set()
+    for g in games:
+        if g.genre:
+            for genre in g.genre.split(','):
+                unique_genres.add(genre.strip())
+    all_genres = sorted(unique_genres)
+
+    # Attach numeric price/size to each game
+    for g in games:
+        g.price_num = parse_price(g.price)
+        g.size_num = parse_size(g.size)
+
+    # Find min/max for sliders
+    price_values = [g.price_num for g in games]
+    size_values = [g.size_num for g in games]
+    min_price_val = min(price_values) if price_values else 0
+    max_price_val = max(price_values) if price_values else 100
+    min_size_val = min(size_values) if size_values else 0
+    max_size_val = max(size_values) if size_values else 100
+
+    # These are the ACTUAL slider/filter values (defaults to full range)
+    min_price = request.args.get("min_price", min_price_val, type=float)
+    max_price = request.args.get("max_price", max_price_val, type=float)
+    min_size = request.args.get("min_size", min_size_val, type=float)
+    max_size = request.args.get("max_size", max_size_val, type=float)
+    title = request.args.get("title", "", type=str)
+    selected_genres = request.args.getlist("genres")
+
+    # Apply filters
+    filtered_games = []
+    for g in games:
+        # Title filter
+        if title and title.lower() not in g.title.lower():
+            continue
+        # Genre filter (match any selected genre)
+        game_genres = [x.strip() for x in g.genre.split(',')] if g.genre else []
+        if selected_genres:
+            if not any(genre in game_genres for genre in selected_genres):
+                continue
+        # Price/size filters
+        if g.price_num < min_price or g.price_num > max_price:
+            continue
+        if g.size_num < min_size or g.size_num > max_size:
+            continue
+        filtered_games.append(g)
+
+    # AJAX update: return just the games grid
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return render_template("game_cards.html", games=filtered_games)
+
+    # Full page
+    return render_template(
+        "catalogue.html",
+        games=filtered_games,
+        all_genres=all_genres,
+        min_price_val=min_price_val,
+        max_price_val=max_price_val,
+        min_price=min_price,
+        max_price=max_price,
+        min_size_val=min_size_val,
+        max_size_val=max_size_val,
+        min_size=min_size,
+        max_size=max_size,
+        selected_genres=selected_genres,
+        title=title,
+    )
 
 @app.route("/game/<int:game_id>")
 @login_required
@@ -147,6 +235,23 @@ def users():
     all_users = User.query.all()
     return render_template("users.html", users=all_users)
 
+def parse_price(price_str):
+    if not price_str or "free" in price_str.lower():
+        return 0.0
+    # Remove $ and commas, then convert
+    try:
+        return float(price_str.replace("$", "").replace(",", "").strip())
+    except Exception:
+        return 0.0
+
+def parse_size(size_str):
+    if not size_str:
+        return 0.0
+    size_str = size_str.lower().replace("gb", "").strip()
+    try:
+        return float(size_str)
+    except Exception:
+        return 0.0
 
 if __name__ == "__main__":
     """

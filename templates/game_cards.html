@@ -1,0 +1,22 @@
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-5">
+  {% for game in games %}
+  <div class="col">
+    <div class="card h-100 shadow-sm">
+      <img src="{{ url_for('static', filename='images/covers/' + game.id|string + '-cover.jpg') }}" class="card-img-top" alt="{{ game.title }} Cover">
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title"><b>{{ game.title }}</b></h5>
+        <p class="card-text flex-grow-1">{{ game.genre }}</p>
+        <div class="mb-3">
+          <span class="badge bg-success fs-6">{{ game.price }}</span>
+        </div>
+        <div class="mb-2 d-flex">
+          <form action="#" method="post" class="me-2 flex-grow-1">
+            <button type="submit" class="btn btn-primary w-100">Buy</button>
+          </form>
+          <a href="{{ url_for('game_details', game_id=game.id) }}" class="btn btn-info w-100">Details</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

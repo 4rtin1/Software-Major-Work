@@ -2,26 +2,54 @@
 {% block title %}Game Catalogue{% endblock %}
 {% block content %}
 <h2 class="mb-4">Game Catalogue</h2>
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-5">
-  {% for game in games %}
-  <div class="col">
-    <div class="card h-100 shadow-sm">
-      <img src="{{ url_for('static', filename='images/covers/' + game.id|string + '-cover.jpg') }}" class="card-img-top" alt="{{ game.title }} Cover">
-      <div class="card-body d-flex flex-column">
-        <h5 class="card-title"><b>{{ game.title }}</b></h5>
-        <p class="card-text flex-grow-1">{{ game.genre }}</p>
-        <div class="mb-3">
-          <span class="badge bg-success fs-6">{{ game.price }}</span>
+
+<!-- Filter Bar -->
+<form id="filter-form" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-4">
+      <input type="text" class="form-control" name="title" placeholder="Search by title"
+        value="{{ title|default('') }}">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Price range: <span id="price-range-label"></span></label>
+      <div id="price-slider" class="mb-2"></div>
+      <!-- Hidden fields updated by slider -->
+      <input type="hidden" name="min_price" id="min-price">
+      <input type="hidden" name="max_price" id="max-price">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Genre:</label><br>
+      {% for genre in all_genres %}
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="genres" value="{{ genre }}" id="genre-{{ genre }}"
+            {% if selected_genres and genre in selected_genres %}checked{% endif %}>
+          <label class="form-check-label" for="genre-{{ genre }}">{{ genre }}</label>
         </div>
-        <div class="mb-2 d-flex">
-          <form action="#" method="post" class="me-2 flex-grow-1">
-            <button type="submit" class="btn btn-primary w-100">Buy</button>
-          </form>
-          <a href="{{ url_for('game_details', game_id=game.id) }}" class="btn btn-info w-100">Details</a>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </div>
-  {% endfor %}
+</form>
+
+<!-- Games grid -->
+<div id="games-list">
+  {% include "game_cards.html" %}
 </div>
+
+<!-- Pass Flask variables to JS -->
+<script>
+  window.catalogueVars = {
+    minPrice: {{ min_price_val|float }},
+    maxPrice: {{ max_price_val|float }},
+    minPriceStart: {{ min_price|float }},
+    maxPriceStart: {{ max_price|float }}
+  };
+</script>
+
+
+<!-- noUiSlider CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.js"></script>
+
+<!-- Your main filter & AJAX logic -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 {% endblock %}

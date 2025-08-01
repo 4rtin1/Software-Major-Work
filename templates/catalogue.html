@@ -5,6 +5,7 @@
 
 <!-- Filter Bar -->
 <form id="filter-form" class="mb-4">
+  <!-- First row: search by title, price slider, size slider -->
   <div class="row g-3">
     <div class="col-md-4">
       <input type="text" class="form-control" name="title" placeholder="Search by title"
@@ -13,11 +14,21 @@
     <div class="col-md-4">
       <label class="form-label">Price range: <span id="price-range-label"></span></label>
       <div id="price-slider" class="mb-2"></div>
-      <!-- Hidden fields updated by slider -->
+      <!-- Hidden fields updated by price slider -->
       <input type="hidden" name="min_price" id="min-price">
       <input type="hidden" name="max_price" id="max-price">
     </div>
     <div class="col-md-4">
+      <label class="form-label">Size range: <span id="size-range-label"></span></label>
+      <div id="size-slider" class="mb-2"></div>
+      <!-- Hidden fields updated by size slider -->
+      <input type="hidden" name="min_size" id="min-size">
+      <input type="hidden" name="max_size" id="max-size">
+    </div>
+  </div>
+  <!-- Second row: genres below the search options -->
+  <div class="row g-3 mt-2">
+    <div class="col-12">
       <label class="form-label">Genre:</label><br>
       {% for genre in all_genres %}
         <div class="form-check form-check-inline">
@@ -41,10 +52,13 @@
     minPrice: {{ min_price_val|float }},
     maxPrice: {{ max_price_val|float }},
     minPriceStart: {{ min_price|float }},
-    maxPriceStart: {{ max_price|float }}
+    maxPriceStart: {{ max_price|float }},
+    minSize: {{ min_size_val|float }},
+    maxSize: {{ max_size_val|float }},
+    minSizeStart: {{ min_size|float }},
+    maxSizeStart: {{ max_size|float }}
   };
 </script>
-
 
 <!-- noUiSlider CDN -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.1/dist/nouislider.min.css">

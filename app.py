@@ -103,6 +103,10 @@ def dashboard():
 @login_required
 def catalogue():
     games = Game.query.all()
+    
+    user_games = current_user.purchased_games.all()
+    user_game_ids = {g.id for g in user_games}
+
 
     # Build unique genre list
     unique_genres = set()
@@ -136,6 +140,9 @@ def catalogue():
     # Apply filters
     filtered_games = []
     for g in games:
+        # Skip games already owned by the user
+        if g.id in user_game_ids:
+            continue  
         # Title filter
         if title and title.lower() not in g.title.lower():
             continue

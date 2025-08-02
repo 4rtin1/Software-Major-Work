@@ -10,6 +10,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # Create a SQLAlchemy database instance
 db = SQLAlchemy()
 
+# Association table for the many-to-many relationship
+purchases = db.Table(
+    'purchases',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('game_id', db.Integer, db.ForeignKey('game.id'), primary_key=True)
+)
 
 class User(UserMixin, db.Model):
     # Primary key: unique ID for each user
@@ -20,6 +26,8 @@ class User(UserMixin, db.Model):
 
     # Hashed password (not the plain text password!)
     password_hash = db.Column(db.String(128), nullable=False)
+    
+    purchased_games = db.relationship('Game', secondary=purchases, backref=db.backref('owners', lazy='dynamic'), lazy='dynamic')
 
     # Boolean flag to mark admin users
     is_admin = db.Column(db.Boolean, default=False)

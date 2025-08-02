@@ -99,6 +99,13 @@ def dashboard():
     """Render the dashboard page for logged-in users."""
     return render_template("dashboard.html")
 
+@app.route("/inventory")
+@login_required
+def inventory():
+    user_games = current_user.purchased_games.all()
+
+    return render_template("game_cards.html", games=user_games, is_inventory=True)
+
 @app.route("/catalogue", methods=["GET"])
 @login_required
 def catalogue():
@@ -106,7 +113,6 @@ def catalogue():
     
     user_games = current_user.purchased_games.all()
     user_game_ids = {g.id for g in user_games}
-
 
     # Build unique genre list
     unique_genres = set()

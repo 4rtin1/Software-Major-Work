@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
             'min': window.minPrice,
             'max': window.maxPrice
         },
-        tooltips: [true, true],
         format: {
             to: function (value) { return "$" + Math.round(value); },
             from: function (value) { return Number(String(value).replace('$', '')); }
@@ -38,7 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
             'min': window.minSize,
             'max': window.maxSize
         },
-        tooltips: [true, true],
         format: {
             to: function (value) {
                 // Show one decimal place and append GB unit

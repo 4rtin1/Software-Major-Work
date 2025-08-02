@@ -20,22 +20,3 @@ body {
 .badge {
     font-family: 'MyFont2', Arial, sans-serif;
 }
-
-/* Put noUiSlider tooltips below the slider bar */
-.noUi-tooltip {
-  top: 40px !important;     /* Adjust distance below bar as needed */
-  bottom: auto !important;  /* Cancel any bottom settings */
-  transform: translate(-50%, 0); /* Center horizontally */
-}
-
-/* Optional: add a little arrow above tooltip */
-.noUi-tooltip:before {
-  content: "";
-  position: absolute;
-  top: -7px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 0 7px 7px 7px;
-  border-style: solid;
-  border-color: transparent transparent #333 transparent;
-}

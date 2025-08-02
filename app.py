@@ -99,27 +99,6 @@ def dashboard():
     """Render the dashboard page for logged-in users."""
     return render_template("dashboard.html")
 
-from flask import render_template, request
-from flask_login import login_required
-
-# Assuming your helper functions are defined:
-def parse_price(price_str):
-    if not price_str or "free" in price_str.lower():
-        return 0.0
-    try:
-        return float(price_str.replace("$", "").replace(",", "").strip())
-    except Exception:
-        return 0.0
-
-def parse_size(size_str):
-    if not size_str:
-        return 0.0
-    size_str = size_str.lower().replace("gb", "").strip()
-    try:
-        return float(size_str)
-    except Exception:
-        return 0.0
-
 @app.route("/catalogue", methods=["GET"])
 @login_required
 def catalogue():
@@ -247,8 +226,12 @@ def parse_price(price_str):
 def parse_size(size_str):
     if not size_str:
         return 0.0
-    size_str = size_str.lower().replace("gb", "").strip()
+    size_str = size_str.strip().lower()
     try:
+        if size_str.endswith("gb"):
+            return float(size_str[:-2].strip())
+        if size_str.endswith("mb"):
+            return float(size_str[:-2].strip()) / 1024
         return float(size_str)
     except Exception:
         return 0.0

@@ -14,7 +14,7 @@
         {% if game.size %}<span class="ms-2 badge bg-info text-dark">Size: {{ game.size }}</span>{% endif %}
         <span class="ms-2 badge bg-success">Price: {{ game.price }}</span>
       </div>
-      <p class="mt-3">{{ game.description }}</p>
+      <p class="mt-3">{{ game.description.replace('\n', '<br>')|safe }}</p>
       {% if game.video_link %}
       <div class="ratio ratio-16x9 mt-4">
         <iframe src="{{ game.video_link }}" title="Gameplay video" allowfullscreen></iframe>

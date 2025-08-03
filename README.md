@@ -1,4 +1,4 @@
-# Game Store Flask App
+# BitForge
 
 A full-featured, modern web application for browsing, buying, and managing digital games. Includes user registration, authentication, inventory, admin panels, and a stylish responsive dashboard.
 

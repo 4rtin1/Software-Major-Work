@@ -283,6 +283,36 @@ def users():
     all_users = User.query.all()
     return render_template("users.html", users=all_users)
 
+@app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_admin:
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash("You can't delete Administrators!", "warning")
+        return redirect(url_for("users"))
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User {user.email} deleted.", "success")
+    return redirect(url_for("users"))
+
+@app.route("/admin/promote_user/<int:user_id>", methods=["POST"])
+@login_required
+def promote_user(user_id):
+    if not current_user.is_admin:
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash("User is already an admin.", "info")
+        return redirect(url_for("users"))
+    user.is_admin = True
+    db.session.commit()
+    flash(f"User {user.email} promoted to admin.", "success")
+    return redirect(url_for("users"))
+
 def parse_price(price_str):
     if not price_str or "free" in price_str.lower():
         return 0.0

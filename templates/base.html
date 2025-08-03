@@ -5,18 +5,9 @@
   <meta charset="utf-8">
   <!-- This is the title that appears in the browser tab -->
   <title>{% block title %}Flask App Template{% endblock %}</title>
-  <!-- 
-    This is a Jinja "block". 
-    It's not real HTML. It's Python-based template code used by Flask.
-    Flask fills in this part with custom content defined in each page (like login.html or dashboard.html).
-  -->
 
   <!-- The icon shown in the browser tab (called a favicon) -->
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
-  <!-- 
-    This is a Flask helper that creates the correct URL for static files or routes.
-    This avoids hardcoding file paths and works even if your app is deployed online.
-  -->
 
   <!-- Bootstrap CSS: A popular styling library that makes your site look good quickly -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -32,66 +23,72 @@
 
 <body>
   <!-- Navigation bar (appears at the top of every page) -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-      <!-- Logo and app name (clicking it takes you to the dashboard) -->
-      <!-- The CSS classes being applied like d-flex are from Bootstrap, e.g.: https://getbootstrap.com/docs/5.0/utilities/flex/ -->
-      <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
-        <img src="{{ url_for('static', filename='images/logo-32-white.png') }}" alt="Logo" width="32" height="32"
-          class="me-2">
-        MyApp
-      </a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-2 mb-4">
+  <div class="container">
+    <!-- Brand & Logo -->
+    <a class="navbar-brand d-flex align-items-center fs-4" href="{{ url_for('dashboard') }}">
+      <img src="{{ url_for('static', filename='images/logo-32-white.png') }}" alt="Logo" width="36" height="36" class="me-2">
+      <span class="fw-bold text-primary">MyApp</span>
+    </a>
 
-      <!-- Hamburger button for small screens -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-        aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <!-- Hamburger icon for mobile -->
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+      aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-      <!-- Menu items: shows different links depending on if the user is logged in -->
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav ms-auto">
-          {% if current_user.is_authenticated %}
-          <!-- This block only shows if a user is logged in -->
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-2">
+        {% if current_user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('account') }}">Account</a>
+            <a class="nav-link px-3{% if request.endpoint == 'catalogue' %} border-bottom border-primary fw-bold{% endif %}" href="{{ url_for('catalogue') }}">Store</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('catalogue') }}">Store</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('cart') }}">
+            <a class="nav-link px-3{% if request.endpoint == 'cart' %} border-bottom border-primary fw-bold{% endif %}" href="{{ url_for('cart') }}">
               Cart
-                {% if session.cart %}
-                  <span class="badge bg-primary">{{ session.cart|length }}</span>
-                {% endif %}
+              {% if session.cart %}
+                <span class="badge rounded-pill bg-primary align-top">{{ session.cart|length }}</span>
+              {% endif %}
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('inventory') }}">Inventory</a>
+            <a class="nav-link px-3{% if request.endpoint == 'inventory' %} border-bottom border-primary fw-bold{% endif %}" href="{{ url_for('inventory') }}">Inventory</a>
           </li>
           {% if current_user.is_admin %}
-          <!-- Only admin users see this -->
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('users') }}">Users</a>
-          </li>
+            <li class="nav-item">
+              <a class="nav-link px-3{% if request.endpoint == 'users' %} border-bottom border-primary fw-bold{% endif %}" href="{{ url_for('users') }}">Users</a>
+            </li>
           {% endif %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+      </ul>
+
+      <!-- Right-side: Login/Register OR User dropdown -->
+      <ul class="navbar-nav ms-auto gap-2">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle px-3 rounded-pill bg-primary text-white" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i> {{ current_user.email.split('@')[0] }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end mt-2 shadow" aria-labelledby="userMenu">
+              <li><a class="dropdown-item" href="{{ url_for('account') }}">Account</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
           </li>
-          {% else %}
-          <!-- These links show if no one is logged in -->
+        {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+            <a class="nav-link px-3{% if request.endpoint == 'login' %} border-bottom border-primary fw-bold{% endif %}" href="{{ url_for('login') }}">Login</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+            <a class="nav-link px-3{% if request.endpoint == 'register' %} border-bottom border-primary fw-bold{% endif %}" href="{{ url_for('register') }}">Register</a>
           </li>
-          {% endif %}
-        </ul>
-      </div>
+        {% endif %}
+      </ul>
     </div>
-  </nav>
+  </div>
+</nav>
+
 
   <!-- This is the main page content area -->
   <div class="container">
@@ -109,10 +106,6 @@
 
     <!-- Page-specific content is inserted here -->
     {% block content %}{% endblock %}
-    <!-- 
-      Each page (login.html, dashboard.html, etc.) will define what goes in this content block.
-      Flask uses Jinja templating to replace these blocks with real HTML when the page is loaded.
-    -->
   </div>
 
   <!-- Bootstrap JavaScript: enables menu toggles, alerts, etc. -->

@@ -12,7 +12,6 @@ from flask_login import (
 from models import db, User, Game
 from forms import RegisterForm, LoginForm, EditAccountForm
 from config import Config
-from seed_db import seed_default_data
 
 # Create the Flask app instance
 app = Flask(__name__)
@@ -408,6 +407,5 @@ if __name__ == "__main__":
     """
     with app.app_context():
         db.create_all()  # Create tables if they don't exist
-        seed_default_data()  # Add default admin and regular users
 
     app.run(debug=True)  # Start the server with debug mode (auto-reloads on changes)

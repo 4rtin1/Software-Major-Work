@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <!-- This is the title that appears in the browser tab -->
-  <title>{% block title %}Flask App Template{% endblock %}</title>
+  <title>{% block title %}BitForge{% endblock %}</title>
 
   <!-- The icon shown in the browser tab (called a favicon) -->
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}">
@@ -29,8 +29,8 @@
   <div class="container">
     <!-- Brand & Logo -->
     <a class="navbar-brand d-flex align-items-center fs-4" href="{{ url_for('dashboard') }}">
-      <img src="{{ url_for('static', filename='images/logo-32-white.png') }}" alt="Logo" width="36" height="36" class="me-2">
-      <span class="fw-bold text-primary">MyApp</span>
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" width="36" height="36" class="me-2">
+      <span class="fw-bold text-primary">BitForge</span>
     </a>
 
     <!-- Hamburger icon for mobile -->

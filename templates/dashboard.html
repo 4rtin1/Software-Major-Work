@@ -1,21 +1,89 @@
-<!--
-  This template extends base.html, meaning it reuses the layout from base.html
-  Only the content inside the block sections will be different.
--->
 {% extends "base.html" %}
-
-<!--
-  This block replaces the <title> in base.html with "Dashboard".
-  This shows up in the browser tab.
--->
 {% block title %}Dashboard{% endblock %}
 
-<!--
-  This block fills in the main page content section defined in base.html.
-  Anything in here will appear inside the <div class="container"> in base.html.
--->
 {% block content %}
-<!-- A heading welcoming the user. current_user is the logged-in user provided by Flask-Login -->
-<h2>Welcome, {{ current_user.email }}!</h2>
-<p>This is your dashboard.</p>
+<h2 class="mb-4">Welcome, {{ current_user.email }}!</h2>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+
+  <!-- Store -->
+  <div class="col">
+    <a href="{{ url_for('catalogue') }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm text-white bg-primary hover-shadow">
+        <div class="card-body text-center">
+          <div class="mb-2 fs-1"><i class="bi bi-shop"></i></div>
+          <h5 class="card-title">Store</h5>
+          <p class="card-text">Browse and buy new games.</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Cart -->
+  <div class="col">
+    <a href="{{ url_for('cart') }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm text-white bg-info hover-shadow">
+        <div class="card-body text-center">
+          <div class="mb-2 fs-1"><i class="bi bi-cart"></i></div>
+          <h5 class="card-title">Cart</h5>
+          <p class="card-text">View your shopping cart.</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Inventory -->
+  <div class="col">
+    <a href="{{ url_for('inventory') }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm text-white bg-success hover-shadow">
+        <div class="card-body text-center">
+          <div class="mb-2 fs-1"><i class="bi bi-collection-play"></i></div>
+          <h5 class="card-title">Inventory</h5>
+          <p class="card-text">See the games you own.</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Account Settings -->
+  <div class="col">
+    <a href="{{ url_for('account') }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm text-white bg-warning hover-shadow">
+        <div class="card-body text-center">
+          <div class="mb-2 fs-1"><i class="bi bi-person-circle"></i></div>
+          <h5 class="card-title">Account</h5>
+          <p class="card-text">Update your email or password.</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Admin: Users Management -->
+  {% if current_user.is_admin %}
+  <div class="col">
+    <a href="{{ url_for('users') }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm text-white" style="background: linear-gradient(135deg, #4b006e 0%, #9d1bb2 100%);">
+        <div class="card-body text-center">
+          <div class="mb-2 fs-1"><i class="bi bi-people-fill"></i></div>
+          <h5 class="card-title">User Management</h5>
+          <p class="card-text">Manage all users (admin only).</p>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Admin: Game Management -->
+  <div class="col">
+    <a href="{{ url_for('games_admin') }}" class="text-decoration-none">
+      <div class="card h-100 shadow-sm text-white" style="background: linear-gradient(135deg, #800033 0%, #e33467 100%);">
+        <div class="card-body text-center">
+          <div class="mb-2 fs-1"><i class="bi bi-controller"></i></div>
+          <h5 class="card-title">Game Management</h5>
+          <p class="card-text">Edit or remove games (admin only).</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endif %}
+
+</div>
 {% endblock %}

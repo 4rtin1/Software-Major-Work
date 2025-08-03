@@ -31,7 +31,7 @@ A full-featured, modern web application for browsing, buying, and managing digit
 git clone https://github.com/yourusername/gamestore-flask.git
 ```
 
-### 2. Install dependancies
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt

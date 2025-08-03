@@ -24,23 +24,23 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"  # Redirect to this route if login is required
 
-
 @login_manager.user_loader
 def load_user(user_id):
     """Load a user by ID for session tracking (used by Flask-Login)."""
     return db.session.get(User, int(user_id))
 
 def get_cart():
+    """Retrieve the current user's cart from the session, or an empty list if not set."""
     return session.get("cart", [])
 
 def save_cart(cart):
+    """Save the user's cart to the session."""
     session["cart"] = cart
 
 @app.route("/")
 def home():
     """Redirect users from the home page to the dashboard."""
     return redirect(url_for("dashboard"))
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -50,22 +50,21 @@ def register():
     - Saves user to the database if form is valid.
     """
     if current_user.is_authenticated:
-        return redirect(
-            url_for("dashboard")
-        )  # Don't allow already logged-in users to register again
+        # Prevent already logged-in users from registering again
+        return redirect(url_for("dashboard"))
 
     form = RegisterForm()
     # If the form was submitted (POST request) and passed all validation checks
     if form.validate_on_submit():
         # Create a new user and save to the database
         user = User(email=form.email.data)
-        user.set_password(form.password.data)
+        user.set_password(form.password.data)  # Hash the password
         db.session.add(user)
         db.session.commit()
         flash("Registration successful. Please log in.", "success")
         return redirect(url_for("login"))
+    # Render registration form (GET or failed POST)
     return render_template("register.html", form=form)
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -86,8 +85,8 @@ def login():
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid email or password", "danger")
+    # Render login form (GET or failed POST)
     return render_template("login.html", form=form)
-
 
 @app.route("/logout")
 @login_required
@@ -100,6 +99,7 @@ def logout():
 @app.route("/add_to_cart/<int:game_id>", methods=["POST"])
 @login_required
 def add_to_cart(game_id):
+    """Add a game to the current user's cart (if not already present)."""
     cart = get_cart()
     if game_id not in cart:
         cart.append(game_id)
@@ -107,12 +107,14 @@ def add_to_cart(game_id):
         flash("Game added to cart!", "success")
     else:
         flash("Game is already in your cart.", "warning")
+    # Redirect back to the previous page or catalogue if referrer missing
     return redirect(request.referrer or url_for("catalogue"))
 
 # Remove from Cart Route
 @app.route("/remove_from_cart/<int:game_id>", methods=["POST"])
 @login_required
 def remove_from_cart(game_id):
+    """Remove a game from the user's cart."""
     cart = get_cart()
     if game_id in cart:
         cart.remove(game_id)
@@ -126,6 +128,7 @@ def remove_from_cart(game_id):
 @app.route("/cart")
 @login_required
 def cart():
+    """Show the current user's cart and games within it."""
     cart = get_cart()
     games = Game.query.filter(Game.id.in_(cart)).all() if cart else []
     return render_template("cart.html", games=games)
@@ -134,11 +137,17 @@ def cart():
 @app.route("/checkout", methods=["POST"])
 @login_required
 def checkout():
+    """
+    Purchase all games in the cart.
+    - Adds the games to the user's inventory.
+    - Clears the cart after successful purchase.
+    """
     cart = get_cart()
     if not cart:
         flash("Your cart is empty!", "warning")
         return redirect(url_for("cart"))
     games = Game.query.filter(Game.id.in_(cart)).all()
+    # Add each game to user's inventory if not already owned
     for game in games:
         if game not in current_user.purchased_games:
             current_user.purchased_games.append(game)
@@ -156,14 +165,19 @@ def dashboard():
 @app.route("/inventory")
 @login_required
 def inventory():
+    """Show all games purchased/owned by the current user."""
     user_games = current_user.purchased_games.all()
     return render_template("inventory.html", games=user_games, is_inventory=True)
 
 @app.route("/catalogue", methods=["GET"])
 @login_required
 def catalogue():
+    """
+    Show the game store catalogue.
+    - Supports filtering by genre, title, price, and size.
+    - Excludes games already owned by the user.
+    """
     games = Game.query.all()
-    
     user_games = current_user.purchased_games.all()
     user_game_ids = {g.id for g in user_games}
 
@@ -175,7 +189,7 @@ def catalogue():
                 unique_genres.add(genre.strip())
     all_genres = sorted(unique_genres)
 
-    # Attach numeric price/size to each game
+    # Attach numeric price/size to each game for filtering
     for g in games:
         g.price_num = parse_price(g.price)
         g.size_num = parse_size(g.size)
@@ -188,7 +202,7 @@ def catalogue():
     min_size_val = min(size_values) if size_values else 0
     max_size_val = max(size_values) if size_values else 100
 
-    # These are the ACTUAL slider/filter values (defaults to full range)
+    # Get current slider/filter values from request args (with defaults)
     min_price = request.args.get("min_price", min_price_val, type=float)
     max_price = request.args.get("max_price", max_price_val, type=float)
     min_size = request.args.get("min_size", min_size_val, type=float)
@@ -196,7 +210,7 @@ def catalogue():
     title = request.args.get("title", "", type=str)
     selected_genres = request.args.getlist("genres")
 
-    # Apply filters
+    # Apply filters to games
     filtered_games = []
     for g in games:
         # Skip games already owned by the user
@@ -217,11 +231,11 @@ def catalogue():
             continue
         filtered_games.append(g)
 
-    # AJAX update: return just the games grid
+    # AJAX update: return just the games grid if it's an AJAX request
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         return render_template("game_cards.html", games=filtered_games)
 
-    # Full page
+    # Render full catalogue page
     return render_template(
         "catalogue.html",
         games=filtered_games,
@@ -241,7 +255,9 @@ def catalogue():
 @app.route("/game/<int:game_id>")
 @login_required
 def game_details(game_id):
+    """Display details for a specific game."""
     game = Game.query.get_or_404(game_id)
+    # Check if user came from inventory (for back button context)
     is_inventory = request.args.get('is_inventory', 'false').lower() == 'true'
     return render_template("game_details.html", game=game, is_inventory=is_inventory)
 
@@ -289,8 +305,6 @@ def account():
     # Render the account edit template
     return render_template("edit_account.html", form=form)
 
-
-
 @app.route("/users")
 @login_required
 def users():
@@ -309,6 +323,7 @@ def users():
 @app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
 @login_required
 def delete_user(user_id):
+    """Admin deletes a user, except themselves."""
     if not current_user.is_admin:
         flash("Access denied.", "danger")
         return redirect(url_for("dashboard"))
@@ -324,6 +339,7 @@ def delete_user(user_id):
 @app.route("/admin/promote_user/<int:user_id>", methods=["POST"])
 @login_required
 def promote_user(user_id):
+    """Admin promotes a user to admin status."""
     if not current_user.is_admin:
         flash("Access denied.", "danger")
         return redirect(url_for("dashboard"))
@@ -339,6 +355,7 @@ def promote_user(user_id):
 @app.route("/admin/games")
 @login_required
 def games_admin():
+    """Admin-only view of all games in the system."""
     if not current_user.is_admin:
         flash("Access denied.", "danger")
         return redirect(url_for("dashboard"))
@@ -348,6 +365,7 @@ def games_admin():
 @app.route("/admin/delete_game/<int:game_id>", methods=["POST"])
 @login_required
 def delete_game(game_id):
+    """Admin deletes a game from the catalogue."""
     if not current_user.is_admin:
         flash("Access denied.", "danger")
         return redirect(url_for("dashboard"))
@@ -360,11 +378,13 @@ def delete_game(game_id):
 @app.route("/admin/edit_game/<int:game_id>", methods=["GET", "POST"])
 @login_required
 def edit_game(game_id):
+    """Admin edits game information (title, description, price, etc)."""
     if not current_user.is_admin:
         flash("Access denied.", "danger")
         return redirect(url_for("dashboard"))
     game = Game.query.get_or_404(game_id)
     if request.method == "POST":
+        # Update game fields from submitted form data
         game.title = request.form["title"]
         game.description = request.form["description"]
         game.developer = request.form["developer"]
@@ -376,9 +396,11 @@ def edit_game(game_id):
         db.session.commit()
         flash("Game updated successfully.", "success")
         return redirect(url_for("games_admin"))
+    # Render edit form for GET requests
     return render_template("edit_game.html", game=game)
 
 def parse_price(price_str):
+    """Convert a price string like '$19.99' or 'Free' to a float value."""
     if not price_str or "free" in price_str.lower():
         return 0.0
     # Remove $ and commas, then convert
@@ -388,6 +410,7 @@ def parse_price(price_str):
         return 0.0
 
 def parse_size(size_str):
+    """Convert a size string like '2 GB' or '900 MB' to a float in GB."""
     if not size_str:
         return 0.0
     size_str = size_str.strip().lower()

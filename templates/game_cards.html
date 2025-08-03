@@ -1,9 +1,3 @@
-{% if is_inventory %}
-{% extends "base.html" %}
-{% block title %}Inventory{% endblock %}
-{% endif %}
-
-
 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-5">
   {% for game in games %}
   <div class="col">
@@ -17,11 +11,11 @@
         </div>
         <div class="mb-2 d-flex">
           {% if not is_inventory %}
-          <form action="#" method="post" class="me-2 flex-grow-1">
+          <form action="{{ url_for('add_to_cart', game_id=game.id) }}" method="post" class="me-2 flex-grow-1">
             <button type="submit" class="btn btn-primary w-100">Buy</button>
           </form>
           {% endif %}
-          <a href="{{ url_for('game_details', game_id=game.id, is_inventory=is_inventory) }}" class="btn btn-info w-100">Details</a>
+          <a href="{{ url_for('game_details', game_id=game.id, is_inventory=True) }}" class="btn btn-info w-100">Details</a>
         </div>
       </div>
     </div>

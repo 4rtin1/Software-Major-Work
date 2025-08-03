@@ -1,5 +1,5 @@
 # Import Flask and related modules
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, session
 from flask_login import (
     LoginManager,
     login_user,
@@ -31,6 +31,11 @@ def load_user(user_id):
     """Load a user by ID for session tracking (used by Flask-Login)."""
     return db.session.get(User, int(user_id))
 
+def get_cart():
+    return session.get("cart", [])
+
+def save_cart(cart):
+    session["cart"] = cart
 
 @app.route("/")
 def home():
@@ -92,6 +97,56 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
+# Add to Cart Route
+@app.route("/add_to_cart/<int:game_id>", methods=["POST"])
+@login_required
+def add_to_cart(game_id):
+    cart = get_cart()
+    if game_id not in cart:
+        cart.append(game_id)
+        save_cart(cart)
+        flash("Game added to cart!", "success")
+    else:
+        flash("Game is already in your cart.", "warning")
+    return redirect(request.referrer or url_for("catalogue"))
+
+# Remove from Cart Route
+@app.route("/remove_from_cart/<int:game_id>", methods=["POST"])
+@login_required
+def remove_from_cart(game_id):
+    cart = get_cart()
+    if game_id in cart:
+        cart.remove(game_id)
+        save_cart(cart)
+        flash("Game removed from cart.", "success")
+    else:
+        flash("Game not found in cart.", "warning")
+    return redirect(url_for("cart"))
+
+# Cart Page
+@app.route("/cart")
+@login_required
+def cart():
+    cart = get_cart()
+    games = Game.query.filter(Game.id.in_(cart)).all() if cart else []
+    return render_template("cart.html", games=games)
+
+# Checkout Route
+@app.route("/checkout", methods=["POST"])
+@login_required
+def checkout():
+    cart = get_cart()
+    if not cart:
+        flash("Your cart is empty!", "warning")
+        return redirect(url_for("cart"))
+    games = Game.query.filter(Game.id.in_(cart)).all()
+    for game in games:
+        if game not in current_user.purchased_games:
+            current_user.purchased_games.append(game)
+    db.session.commit()
+    save_cart([])  # Clear cart
+    flash("Purchase successful! Games added to your inventory.", "success")
+    return redirect(url_for("inventory"))
 
 @app.route("/dashboard")
 @login_required
@@ -103,8 +158,8 @@ def dashboard():
 @login_required
 def inventory():
     user_games = current_user.purchased_games.all()
-
-    return render_template("game_cards.html", games=user_games, is_inventory=True)
+    print("INVENTORY GAMES:", user_games)
+    return render_template("inventory.html", games=user_games, is_inventory=True)
 
 @app.route("/catalogue", methods=["GET"])
 @login_required
@@ -189,7 +244,8 @@ def catalogue():
 @login_required
 def game_details(game_id):
     game = Game.query.get_or_404(game_id)
-    return render_template("game_details.html", game=game)
+    is_inventory = request.args.get('is_inventory', 'false').lower() == 'true'
+    return render_template("game_details.html", game=game, is_inventory=is_inventory)
 
 @app.route("/account", methods=["GET", "POST"])
 @login_required

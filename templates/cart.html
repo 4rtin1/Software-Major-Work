@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Your Cart{% endblock %}
+
+{% block content %}
+<h2>Your Cart</h2>
+{% if games %}
+  <form action="{{ url_for('checkout') }}" method="post">
+    <table class="table table-borderless align-middle">
+      <thead>
+        <tr>
+          <th scope="col">Title</th>
+          <th scope="col">Genre</th>
+          <th scope="col">Price</th>
+          <th scope="col" class="text-end">Remove</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for game in games %}
+        <tr>
+          <td><strong>{{ game.title }}</strong></td>
+          <td>{{ game.genre }}</td>
+          <td>{{ game.price }}</td>
+          <td class="text-end">
+            <form action="{{ url_for('remove_from_cart', game_id=game.id) }}" method="post" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Purchase & Add to Inventory</button>
+  </form>
+{% else %}
+  <div class="alert alert-info">Your cart is empty.</div>
+{% endif %}
+{% endblock %}

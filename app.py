@@ -158,7 +158,6 @@ def dashboard():
 @login_required
 def inventory():
     user_games = current_user.purchased_games.all()
-    print("INVENTORY GAMES:", user_games)
     return render_template("inventory.html", games=user_games, is_inventory=True)
 
 @app.route("/catalogue", methods=["GET"])
@@ -251,21 +250,46 @@ def game_details(game_id):
 @login_required
 def account():
     """
-    Allow the logged-in user to update their email.
-    - Shows a form prefilled with the current email.
-    - Validates and saves new email if submitted.
+    Allows the logged-in user to update their email and/or password.
+    - Changing the password requires entering the current password for security.
+    - Email can be updated independently.
     """
-    # Prefill form with the current user's email
+    # Create the edit account form, passing the current email for validation
     form = EditAccountForm(original_email=current_user.email)
+
+    # Process form submission
     if form.validate_on_submit():
-        # Update the user's email
-        current_user.email = form.email.data
+        # 1. Handle email change if different from current email
+        if form.email.data != current_user.email:
+            current_user.email = form.email.data
+            flash("Your email has been updated.", "success")
+
+        # 2. Handle password change, if any password fields are filled
+        # Only attempt change if any password fields are filled in
+        if form.current_password.data or form.new_password.data or form.confirm_new_password.data:
+            # a) Require all three password fields for a change
+            if not (form.current_password.data and form.new_password.data and form.confirm_new_password.data):
+                flash("To change your password, fill in all password fields.", "danger")
+            # b) Validate current password is correct
+            elif not current_user.check_password(form.current_password.data):
+                flash("Current password is incorrect.", "danger")
+            else:
+                # c) Set the new password
+                current_user.set_password(form.new_password.data)
+                flash("Your password has been updated.", "success")
+
+        # Commit changes to the database (email and/or password)
         db.session.commit()
-        flash("Your account has been updated.", "success")
+        # Redirect back to the account page to avoid form re-submission
         return redirect(url_for("account"))
+
+    # On GET, pre-fill form with current email
     elif request.method == "GET":
-        form.email.data = current_user.email  # Fill in the email when the page loads
+        form.email.data = current_user.email
+
+    # Render the account edit template
     return render_template("edit_account.html", form=form)
+
 
 
 @app.route("/users")

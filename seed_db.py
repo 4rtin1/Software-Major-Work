@@ -31,5 +31,5 @@ def seed_default_data():
     - One regular user
     This function is called when the app first starts.
     """
-    create_user("admin@example.com", "admin123", is_admin=True)
-    create_user("user@example.com", "user123", is_admin=False)
+    create_user("admin@account.com", "12345678", is_admin=True)
+    create_user("user@account.com", "12345678", is_admin=False)

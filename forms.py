@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 
 # Import built-in validators for checking form input
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional, Length
 
 # Import the User model to check for existing users during validation
 from models import User
@@ -46,22 +46,32 @@ class LoginForm(FlaskForm):
 
     # Submit button
     submit = SubmitField("Login")
-
-
+            
 class EditAccountForm(FlaskForm):
-    # Email field for updating the account (required + valid format)
+    # Email field for changing the user's email (required)
     email = StringField("Email", validators=[DataRequired(), Email()])
+
+    # Current password field (optional, used for verifying before changing password)
+    current_password = PasswordField("Current Password", validators=[Optional()])
+
+    # New password field (optional, min length for security)
+    new_password = PasswordField("New Password", validators=[Optional(), Length(min=6)])
+
+    # Confirmation of new password (must match new_password)
+    confirm_new_password = PasswordField("Confirm New Password", validators=[
+        Optional(), EqualTo("new_password", message="Passwords must match")
+    ])
 
     # Submit button
     submit = SubmitField("Update")
 
-    # Custom constructor — stores the original email to compare during validation
     def __init__(self, original_email, *args, **kwargs):
+        # Store the original email for validation (so user can keep same email)
         super().__init__(*args, **kwargs)
         self.original_email = original_email
 
-    # Custom validator — only raise an error if the new email is already used by someone else
     def validate_email(self, email):
+        # If the email was changed, make sure it's not taken by someone else
         if email.data != self.original_email:
             user = User.query.filter_by(email=email.data).first()
             if user:

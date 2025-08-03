@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Edit Game{% endblock %}
+{% block content %}
+<h2>Edit Game</h2>
+<form method="POST">
+  <div class="mb-3">
+    <label class="form-label">Title</label>
+    <input type="text" class="form-control" name="title" value="{{ game.title }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description" rows="3">{{ game.description }}</textarea>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Developer</label>
+    <input type="text" class="form-control" name="developer" value="{{ game.developer }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Publisher</label>
+    <input type="text" class="form-control" name="publisher" value="{{ game.publisher }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Price</label>
+    <input type="text" class="form-control" name="price" value="{{ game.price }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Genre</label>
+    <input type="text" class="form-control" name="genre" value="{{ game.genre }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Size</label>
+    <input type="text" class="form-control" name="size" value="{{ game.size }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Video Link</label>
+    <input type="text" class="form-control" name="video_link" value="{{ game.video_link }}">
+  </div>
+  <button type="submit" class="btn btn-success">Save</button>
+  <a href="{{ url_for('games_admin') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

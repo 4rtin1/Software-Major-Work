@@ -313,6 +313,48 @@ def promote_user(user_id):
     flash(f"User {user.email} promoted to admin.", "success")
     return redirect(url_for("users"))
 
+@app.route("/admin/games")
+@login_required
+def games_admin():
+    if not current_user.is_admin:
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+    games = Game.query.all()
+    return render_template("games_admin.html", games=games)
+
+@app.route("/admin/delete_game/<int:game_id>", methods=["POST"])
+@login_required
+def delete_game(game_id):
+    if not current_user.is_admin:
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+    game = Game.query.get_or_404(game_id)
+    db.session.delete(game)
+    db.session.commit()
+    flash(f"Game '{game.title}' deleted.", "success")
+    return redirect(url_for("games_admin"))
+
+@app.route("/admin/edit_game/<int:game_id>", methods=["GET", "POST"])
+@login_required
+def edit_game(game_id):
+    if not current_user.is_admin:
+        flash("Access denied.", "danger")
+        return redirect(url_for("dashboard"))
+    game = Game.query.get_or_404(game_id)
+    if request.method == "POST":
+        game.title = request.form["title"]
+        game.description = request.form["description"]
+        game.developer = request.form["developer"]
+        game.publisher = request.form["publisher"]
+        game.price = request.form["price"]
+        game.genre = request.form["genre"]
+        game.size = request.form["size"]
+        game.video_link = request.form["video_link"]
+        db.session.commit()
+        flash("Game updated successfully.", "success")
+        return redirect(url_for("games_admin"))
+    return render_template("edit_game.html", game=game)
+
 def parse_price(price_str):
     if not price_str or "free" in price_str.lower():
         return 0.0

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Manage Games{% endblock %}
+{% block content %}
+<h2>All Games</h2>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mb-3">Back to Dashboard</a>
+<table class="table table-bordered align-middle">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Developer</th>
+      <th>Publisher</th>
+      <th>Genre</th>
+      <th>Price</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for game in games %}
+    <tr>
+      <td>{{ game.id }}</td>
+      <td>{{ game.title }}</td>
+      <td>{{ game.developer }}</td>
+      <td>{{ game.publisher }}</td>
+      <td>{{ game.genre }}</td>
+      <td>{{ game.price }}</td>
+      <td class="d-flex align-items-center gap-2">
+        <a href="{{ url_for('edit_game', game_id=game.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form action="{{ url_for('delete_game', game_id=game.id) }}" method="post">
+          <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this game?');">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

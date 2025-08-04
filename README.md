@@ -28,7 +28,7 @@ A full-featured, modern web application for browsing, buying, and managing digit
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/gamestore-flask.git
+git clone https://github.com/4rtin1/Software-Major-Work.git
 ```
 
 ### 2. Install dependencies
